@@ -1,8 +1,6 @@
 package com.app;
 
 import com.app.cli.CommandLineApp;
-import com.app.exception.CookieNotFoundException;
-import com.app.exception.InvalidFileException;
 import com.app.service.CookieAnalyzer;
 import com.app.service.CookieProcessor;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +23,11 @@ public class CommandLineAppTest {
     public void testMissingArguments() throws IOException {
         File testFile = File.createTempFile("test-log", ".csv");
         String[] args = {"-f", testFile.getAbsolutePath()};
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CommandLineApp.main(args));
-        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", exception.getMessage());
-
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", output);
         testFile.deleteOnExit();
     }
 
@@ -36,9 +35,11 @@ public class CommandLineAppTest {
     public void testExtraArguments() throws IOException {
         File testFile = File.createTempFile("test-log", ".csv");
         String[] args = {"-f", testFile.getAbsolutePath(), "-d", "2025-03-29", "--extra", "value"};
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CommandLineApp.main(args));
-        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", exception.getMessage());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", output);
 
         testFile.deleteOnExit();
     }
@@ -48,8 +49,13 @@ public class CommandLineAppTest {
         File testFile = File.createTempFile("test-log", ".csv");
         String[] args = {"-d", "2025-03-29", "-f", testFile.getAbsolutePath()};
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CommandLineApp.main(args));
-        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", exception.getMessage());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        CommandLineApp.main(args);
+
+        String output = outputStream.toString().trim();
+        assertEquals("Invalid arguments. Usage: java CommandLineApp -f <logfile.csv> -d <date>", output);
 
         testFile.deleteOnExit();
     }
@@ -61,20 +67,25 @@ public class CommandLineAppTest {
             file.delete();
         }
         String[] args = {"-f", "nonexistent.csv", "-d", "2025-03-29"};
-        InvalidFileException exception = assertThrows(InvalidFileException.class, () -> CommandLineApp.main(args));
-        assertEquals("The specified file does not exist: nonexistent.csv", exception.getMessage());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("The specified file does not exist: nonexistent.csv", output);
     }
 
     @Test
     public void testInvalidFileFormat() throws IOException {
         File file = new File("invalid-file.txt");
         if (!file.exists()) {
-            file.createNewFile(); // Create a non-CSV file
+            file.createNewFile();
         }
         String[] args = {"-f", file.getAbsolutePath(), "-d", "2025-03-29"};
-        InvalidFileException exception = assertThrows(InvalidFileException.class, () -> CommandLineApp.main(args));
-        assertEquals("Error: Invalid file format. Expected a .csv file.", exception.getMessage());
-
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("Error: Invalid file format. Expected a .csv file.", output);
         file.deleteOnExit();
     }
 
@@ -82,8 +93,12 @@ public class CommandLineAppTest {
     public void testInvalidDateFormat() throws IOException {
         File testFile = File.createTempFile("test-log", ".csv");
         String[] args = {"-f", testFile.getAbsolutePath(), "-d", "03-29-2025"};
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> CommandLineApp.main(args));
-        assertEquals("Error: Invalid date format. Expected format: yyyy-MM-dd (e.g., 2018-12-09)", exception.getMessage());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("Error: Invalid date format. Expected format: yyyy-MM-dd (e.g., 2018-12-09)", output);
+
         testFile.deleteOnExit();
     }
 
@@ -95,8 +110,12 @@ public class CommandLineAppTest {
             writer.write("cookie1,2025-03-29T10:00:00+00:00\n");
         }
         String[] args = {"-f", testFile.getAbsolutePath(), "-d", "2025-03-28"};
-        CookieNotFoundException exception = assertThrows(CookieNotFoundException.class, () -> CommandLineApp.main(args));
-        assertEquals("No cookies found for the given date.", exception.getMessage());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+        CommandLineApp.main(args);
+        String output = outputStream.toString().trim();
+        assertEquals("No cookies found for the given date.", output);
+
         testFile.deleteOnExit();
     }
 

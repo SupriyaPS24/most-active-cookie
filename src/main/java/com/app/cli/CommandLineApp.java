@@ -37,7 +37,6 @@ public class CommandLineApp {
             result.forEach(System.out::println);
         } catch (IllegalArgumentException | InvalidFileException | CookieNotFoundException e) {
             System.err.println(e.getMessage());
-            throw e; //test
         } catch (IOException e) {
             System.err.println("Error processing the log file: " + e.getMessage());
         }
